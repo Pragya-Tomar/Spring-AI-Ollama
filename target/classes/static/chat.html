@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chat with AI</title>
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #7FA9D9, #ff66b2);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+    }
+
+    .chat-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        width: 90%;
+        max-width: 500px;
+        padding: 24px;
+        position: relative;
+    }
+
+    .back-link {
+        position: absolute;
+        top: 16px;
+        left: 20px;
+        text-decoration: none;
+        color: #7FA9D9;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    h2 {
+        text-align: center;
+        color: #333;
+        margin: 12px 0 20px;
+    }
+
+    #chatBox {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 16px;
+        background: #fafafa;
+    }
+
+    .message {
+        padding: 8px 12px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+
+    .user-msg {
+        background: #7FA9D9;
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .bot-msg {
+        background: #f0e6f6;
+        color: #333;
+    }
+
+    .input-row {
+        display: flex;
+        gap: 8px;
+    }
+
+    #queryInput {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        outline: none;
+    }
+
+    button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 8px;
+        background: #ff66b2;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        opacity: 0.9;
+    }
+
+    .loading {
+        font-style: italic;
+        color: #888;
+    }
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+    <a href="/index.html" class="back-link">&larr; Home</a>
+    <h2>AI Chat Agent</h2>
+    <div id="chatBox"></div>
+    <div class="input-row">
+        <input type="text" id="queryInput" placeholder="Ask something..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chatBox');
+    const queryInput = document.getElementById('queryInput');
+
+    function appendMessage(text, className) {
+        const msg = document.createElement('div');
+        msg.className = 'message ' + className;
+        msg.textContent = text;
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return msg;
+    }
+
+    async function sendMessage() {
+        const query = queryInput.value.trim();
+        if (!query) return;
+
+        appendMessage(query, 'user-msg');
+        queryInput.value = '';
+
+        const loadingMsg = appendMessage('Thinking...', 'bot-msg loading');
+
+        try {
+            const response = await fetch('/api/chat?q=' + encodeURIComponent(query));
+            const data = await response.text();
+            loadingMsg.textContent = data;
+            loadingMsg.classList.remove('loading');
+        } catch (err) {
+            loadingMsg.textContent = 'Error: could not reach server.';
+            loadingMsg.classList.remove('loading');
+        }
+    }
+</script>
+
+</body>
+</html>
